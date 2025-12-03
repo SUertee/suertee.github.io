@@ -19,8 +19,8 @@
     @apply flex items-center gap-2 rounded-full border border-white/10 bg-white/5 px-3 py-1 text-xs font-semibold tracking-wide text-white shadow-sm transition hover:border-white/30 hover:bg-white/10;
   }
 
-  .brand-avatar {
-    @apply flex h-6 w-6 items-center justify-center rounded-full bg-white/90 text-[11px] font-bold text-black;
+  .brand-avatar-img {
+    @apply h-7 w-7 rounded-full border border-white/20 object-cover;
   }
 
   .nav-links {
