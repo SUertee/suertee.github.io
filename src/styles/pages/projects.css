@@ -1,0 +1,17 @@
+@layer components {
+  .projects-page {
+    @apply space-y-6;
+  }
+
+  .projects-header {
+    @apply flex items-baseline justify-between gap-4;
+  }
+
+  .projects-title {
+    @apply text-2xl font-semibold text-neutral-50;
+  }
+
+  .projects-grid {
+    @apply grid gap-4 md:grid-cols-2;
+  }
+}

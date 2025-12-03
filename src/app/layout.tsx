@@ -1,5 +1,5 @@
 // app/layout.tsx
-import "./globals.css";
+import "@/styles/globals.css";
 import type { Metadata } from "next";
 import Navbar from "@/components/Navbar";
 import { Providers } from "./providers";
@@ -20,7 +20,8 @@ export default function RootLayout({
       <body className="bg-black text-neutral-50 antialiased">
         <Providers>
           <Navbar />
-          <main className="mx-auto max-w-6xl px-4 pt-20">{children}</main>
+          {/* ↓ use the new class */}
+          <main className="main-layout">{children}</main>
         </Providers>
       </body>
     </html>

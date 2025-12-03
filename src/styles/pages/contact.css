@@ -1,0 +1,9 @@
+@layer components {
+  .contact-section {
+    @apply mt-10 space-y-3 text-sm text-neutral-300;
+  }
+
+  .contact-title {
+    @apply text-base font-semibold text-neutral-100;
+  }
+}

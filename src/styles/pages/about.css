@@ -1,0 +1,29 @@
+@layer components {
+  .about-page {
+    @apply space-y-6;
+  }
+
+  .about-header {
+    @apply space-y-2;
+  }
+
+  .about-title {
+    @apply text-2xl font-semibold text-neutral-50;
+  }
+
+  .about-section {
+    @apply space-y-3 text-sm text-neutral-300;
+  }
+
+  .about-section--facts {
+    @apply space-y-2;
+  }
+
+  .about-facts-title {
+    @apply text-base font-semibold text-neutral-100;
+  }
+
+  .about-facts-list {
+    @apply list-disc pl-5 space-y-1;
+  }
+}

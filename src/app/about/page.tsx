@@ -1,12 +1,12 @@
 // app/about/page.tsx
 export default function AboutPage() {
   return (
-    <div className="space-y-6">
-      <header className="space-y-2">
-        <h1 className="text-2xl font-semibold text-neutral-50">About me</h1>
+    <div className="about-page">
+      <header className="about-header">
+        <h1 className="about-title">About me</h1>
       </header>
 
-      <section className="space-y-3 text-sm text-neutral-300">
+      <section className="about-section">
         <p>
           I&apos;m Harry Xu, a third-year Bachelor of Advanced Computing student
           at the University of Sydney, majoring in Software Development. I enjoy
@@ -30,11 +30,9 @@ export default function AboutPage() {
         </p>
       </section>
 
-      <section className="space-y-2 text-sm text-neutral-300">
-        <h2 className="text-base font-semibold text-neutral-100">
-          Quick facts
-        </h2>
-        <ul className="list-disc pl-5 space-y-1">
+      <section className="about-section about-section--facts">
+        <h2 className="about-facts-title">Quick facts</h2>
+        <ul className="about-facts-list">
           <li>Location: Sydney, Australia</li>
           <li>Degree: Bachelor of Advanced Computing (2026 expected)</li>
           <li>Interests: Photography, hiking, fitness, reading, singing</li>
