@@ -4,7 +4,7 @@
   }
 
   .site-nav {
-    @apply mx-auto flex max-w-6xl items-center justify-between px-4 py-3 text-sm text-neutral-100;
+    @apply mx-auto flex w-full items-center justify-between px-4 py-3 text-sm text-neutral-100;
   }
 
   .nav-left {

@@ -1,127 +1,216 @@
 "use client";
 
+import { useCallback, useMemo } from "react";
 import { useLanguage } from "@/context/LanguageContext";
-
-const copy = {
-  en: {
-    headline: "Hi, I'm Jiacheng Xu",
-    wave: "👋",
-    currently: "Currently",
-    currentCompany: "University of Sydney",
-    currentLocation: "Studying in University of Sydney",
-    currentRole:
-      "Final year Bachelor of Advanced Computing student, majoring in Software Development.",
-    currentStatus: "Open to internships and full-time opportunities",
-    previousTitle:
-      "Previously: AI calendar app · Secure access platform · Project management learning tool",
-    creator:
-      "Creator of side projects that blend Java backends, TypeScript frontends, and LLM features.",
-    socials: [
-      {
-        label: "GitHub",
-        href: "https://github.com/suertee",
-        icon: "/icons/github.svg",
-      },
-      {
-        label: "LinkedIn",
-        href: "https://www.linkedin.com/in/jiacheng-xu-12316424b/",
-        icon: "/icons/linkedin.svg",
-      },
-      {
-        label: "Email",
-        href: "mailto:suerte.668@gmail.com",
-        icon: "/icons/email.svg",
-      },
-    ],
-  },
-  zh: {
-    headline: "你好，我是徐嘉成",
-    wave: "👋",
-    currently: "目前在做",
-    currentCompany: "悉尼大学",
-    currentLocation: "就读于悉尼大学",
-    currentRole: "高级计算学士（软件开发方向）在读学生。",
-    currentStatus: "寻找实习与全职机会",
-    previousTitle: "曾构建：AI 日历应用、安全访问平台、项目管理学习工具等。",
-    creator: "喜欢把 Java 后端、TS 前端和 LLM 能力结合，做落地的小工具与产品。",
-    socials: [
-      {
-        label: "GitHub",
-        href: "https://github.com/suertee",
-        icon: "/icons/github.svg",
-      },
-      {
-        label: "LinkedIn",
-        href: "https://www.linkedin.com/in/jiacheng-xu-12316424b/",
-        icon: "/icons/linkedin.svg",
-      },
-      {
-        label: "邮箱",
-        href: "mailto:suerte.668@gmail.com",
-        icon: "/icons/email.svg",
-      },
-    ],
-  },
-} as const;
+import ProjectCard from "@/components/ProjectCard";
+import { projects, localizeProject } from "@/data/projects";
+import { homeCopy } from "@/data/home";
 
 export default function HomePage() {
   const { language } = useLanguage();
-  const content = copy[language];
+
+  const content = useMemo(
+    () => ({
+      hero: homeCopy.hero[language],
+      about: homeCopy.about[language],
+      education: homeCopy.education[language],
+      featuredProjects: homeCopy.featuredProjects[language],
+    }),
+    [language]
+  );
+
+  const scrollToAbout = useCallback(() => {
+    document.getElementById("about")?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }, []);
+
+  const scrollToProjects = useCallback(() => {
+    document.getElementById("home-projects")?.scrollIntoView({
+      behavior: "smooth",
+      block: "start",
+    });
+  }, []);
 
   return (
-    <section className="hero-section">
-      {/* Background glows */}
-      <div className="hero-bg">
-        <div className="hero-bg-orb hero-bg-orb--left" />
-        <div className="hero-bg-orb hero-bg-orb--right" />
-        <div className="hero-bg-radial" />
-        <div className="hero-bg-fade" />
-      </div>
+    <div className="home-page">
+      <section className="hero-section">
+        {/* Background glows */}
+        <div className="hero-bg">
+          <div className="hero-bg-orb hero-bg-orb--left" />
+          <div className="hero-bg-orb hero-bg-orb--right" />
+          <div className="hero-bg-radial" />
+          <div className="hero-bg-fade" />
+        </div>
 
-      {/* Main card */}
-      <div className="hero-card">
-        <header className="hero-header">
-          <h1 className="hero-title">
-            {content.headline} <span className="hero-wave">{content.wave}</span>
-          </h1>
-        </header>
-
-        <div className="hero-meta">
-          <div className="hero-meta-row">
-            <div className="hero-current">
-              <span className="hero-rocket">🚀</span>
-              <span>{content.currently}</span>
-            </div>
-            <div className="hero-location">{content.currentLocation}</div>
+        {/* Main hero card */}
+        <div className="hero-card">
+          {/* Floating avatar */}
+          <div className="hero-avatar-floating">
+            <img
+              src="/avatar/me.jpg"
+              alt="Jiacheng Xu"
+              className="hero-avatar-floating-img"
+            />
           </div>
 
-          <p className="hero-role">{content.currentRole}</p>
-          <p className="hero-previous">{content.previousTitle}</p>
+          {/* Greeting */}
+          <header className="hero-header">
+            <h1 className="hero-title">
+              {content.hero.headline}{" "}
+              <span className="hero-wave">{content.hero.wave}</span>
+            </h1>
+          </header>
+
+          {/* Meta info */}
+          <div className="hero-meta">
+            <div className="hero-meta-row">
+              <div className="hero-current">
+                <span className="hero-rocket">🚀</span>
+                <span>{content.hero.currently}</span>
+              </div>
+              <div className="hero-location">
+                {content.hero.currentLocation}
+              </div>
+            </div>
+
+            <p className="hero-role">{content.hero.currentRole}</p>
+            <p className="hero-previous">{content.hero.previousTitle}</p>
+          </div>
+
+          {/* Creator line */}
+          <p className="hero-creator">{content.hero.creator}</p>
+
+          {/* Social links */}
+          <div id="contact" className="hero-socials">
+            {content.hero.socials.map((item) => (
+              <a
+                key={item.label}
+                href={item.href}
+                target="_blank"
+                rel="noreferrer"
+                className="hero-social-pill"
+              >
+                {item.icon && (
+                  <img
+                    src={item.icon}
+                    alt={item.label}
+                    className="hero-social-icon"
+                  />
+                )}
+                <span>{item.label}</span>
+              </a>
+            ))}
+          </div>
         </div>
 
-        <p className="hero-creator">{content.creator}</p>
+        {/* Scroll arrow */}
+        <button
+          type="button"
+          className="hero-scroll-button"
+          onClick={scrollToAbout}
+          aria-label={content.hero.arrowLabel}
+        >
+          <span className="hero-scroll-icon">↓</span>
+        </button>
+      </section>
 
-        <div id="contact" className="hero-socials">
-          {content.socials.map((item) => (
-            <a
-              key={item.label}
-              href={item.href}
-              target="_blank"
-              rel="noreferrer"
-              className="hero-social-pill"
-            >
-              {item.icon && (
-                <img
-                  src={item.icon}
-                  alt={item.label}
-                  className="hero-social-icon"
-                />
-              )}
-              <span>{item.label}</span>
-            </a>
+      <section id="about" className="home-section home-section--paired">
+        <header className="home-section-header">
+          <h2 className="home-section-title">{content.about.title}</h2>
+          <p className="home-section-subtitle">{content.about.subtitle}</p>
+        </header>
+
+        <div className="about-card">
+          <div className="about-card-head">
+            <span className="section-kicker">{content.about.title}</span>
+            <h3 className="about-card-title">
+              {content.hero.headline} {content.hero.wave}
+            </h3>
+          </div>
+
+          <div className="about-text">
+            {content.about.paragraphs.map((paragraph) => (
+              <p key={paragraph}>{paragraph}</p>
+            ))}
+          </div>
+
+          <ul className="about-facts">
+            {content.about.facts.map((fact) => (
+              <li key={fact}>{fact}</li>
+            ))}
+          </ul>
+
+          <button
+            type="button"
+            className="section-cta"
+            onClick={scrollToProjects}
+          >
+            {content.about.cta}
+          </button>
+        </div>
+      </section>
+
+      <section id="education" className="home-section home-section--education">
+        <header className="home-section-header">
+          <h2 className="home-section-title">{content.education.title}</h2>
+          <p className="home-section-subtitle">{content.education.subtitle}</p>
+        </header>
+
+        <div className="education-timeline">
+          {content.education.items.map((item, index) => (
+            <div key={item.school} className="education-timeline-item">
+              <div className="education-timeline-marker">
+                <span className="education-dot" />
+                {index !== content.education.items.length - 1 && (
+                  <span className="education-line" />
+                )}
+              </div>
+              <div className="education-timeline-card">
+                <div className="education-card-top">
+                  <div>
+                    <p className="education-card-degree">{item.degree}</p>
+                    <p className="education-card-school">{item.school}</p>
+                  </div>
+                  <span className="info-card-pill">{item.period}</span>
+                </div>
+                <p className="education-card-body">{item.details}</p>
+              </div>
+            </div>
           ))}
         </div>
-      </div>
-    </section>
+      </section>
+
+      <section
+        id="home-projects"
+        className="home-section home-section--projects"
+      >
+        <header className="home-section-header">
+          <h2 className="home-section-title">
+            {content.featuredProjects.title}
+          </h2>
+          <p className="home-section-subtitle">
+            {content.featuredProjects.subtitle}
+          </p>
+        </header>
+
+        <div className="home-projects-grid">
+          {projects.slice(0, 3).map((project) => (
+            <ProjectCard
+              key={project.id}
+              project={localizeProject(project, language)}
+              compact
+            />
+          ))}
+        </div>
+
+        <div className="home-section-footer">
+          <a href="/projects" className="home-section-link">
+            {content.featuredProjects.cta} →
+          </a>
+        </div>
+      </section>
+    </div>
   );
 }
