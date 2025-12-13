@@ -2,7 +2,9 @@
 
 @import "./pages/main.css";
 @import "./pages/about.css";
-@import "./pages/projects.css";
+@import "./pages/projects/projects.css";
+@import "./pages/projects/projectsScatter.css";
+@import "./pages/projects/projectsTimeline.css";
 @import "./pages/contact.css";
 @import "./pages/home.css";
 

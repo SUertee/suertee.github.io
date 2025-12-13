@@ -19,7 +19,7 @@ export default function Navbar() {
     language === "en"
       ? { projects: "Projects", about: "About", contact: "Contact" }
       : { projects: "项目", about: "关于", contact: "联系" };
-  const name = language === "en" ? "Jiacheng Xu" : "徐嘉成";
+  const name = language === "en" ? "Jiacheng" : "嘉成";
 
   return (
     <header className="site-header">
