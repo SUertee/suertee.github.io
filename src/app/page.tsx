@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useMemo } from "react";
+import { useCallback, useEffect, useMemo } from "react";
 import { useLanguage } from "@/context/LanguageContext";
 import ProjectCard from "@/components/ProjectCard";
 import { projects, localizeProject } from "@/data/projects";
@@ -33,9 +33,35 @@ export default function HomePage() {
     });
   }, []);
 
+  useEffect(() => {
+    const elements = Array.from(
+      document.querySelectorAll<HTMLElement>(".reveal-on-scroll"),
+    );
+
+    if (!("IntersectionObserver" in window)) {
+      elements.forEach((el) => el.classList.add("reveal-visible"));
+      return;
+    }
+
+    const observer = new IntersectionObserver(
+      (entries, obs) => {
+        entries.forEach((entry) => {
+          if (entry.isIntersecting) {
+            entry.target.classList.add("reveal-visible");
+            obs.unobserve(entry.target);
+          }
+        });
+      },
+      { threshold: 0.2 },
+    );
+
+    elements.forEach((el) => observer.observe(el));
+    return () => observer.disconnect();
+  }, [language]);
+
   return (
     <div className="home-page">
-      <section className="hero-section">
+      <section className="hero-section reveal-on-scroll">
         {/* Background glows */}
         <div className="hero-bg">
           <div className="hero-bg-orb hero-bg-orb--left" />
@@ -116,13 +142,16 @@ export default function HomePage() {
         </button>
       </section>
 
-      <section id="about" className="home-section home-section--paired">
+      <section
+        id="about"
+        className="home-section home-section--paired reveal-on-scroll"
+      >
         <header className="home-section-header">
           <h2 className="home-section-title">{content.about.title}</h2>
           <p className="home-section-subtitle">{content.about.subtitle}</p>
         </header>
 
-        <div className="about-card">
+        <div className="about-card reveal-on-scroll">
           <div className="about-card-head">
             <span className="section-kicker">{content.about.title}</span>
             <h3 className="about-card-title">
@@ -152,7 +181,10 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section id="education" className="home-section home-section--education">
+      <section
+        id="education"
+        className="home-section home-section--education reveal-on-scroll"
+      >
         <header className="home-section-header">
           <h2 className="home-section-title">{content.education.title}</h2>
           <p className="home-section-subtitle">{content.education.subtitle}</p>
@@ -160,7 +192,10 @@ export default function HomePage() {
 
         <div className="education-timeline">
           {content.education.items.map((item, index) => (
-            <div key={item.school} className="education-timeline-item">
+            <div
+              key={item.school}
+              className="education-timeline-item reveal-on-scroll"
+            >
               <div className="education-timeline-marker">
                 <span className="education-dot" />
                 {index !== content.education.items.length - 1 && (
@@ -184,7 +219,7 @@ export default function HomePage() {
 
       <section
         id="home-projects"
-        className="home-section home-section--projects"
+        className="home-section home-section--projects reveal-on-scroll"
       >
         <header className="home-section-header">
           <h2 className="home-section-title">
@@ -197,11 +232,15 @@ export default function HomePage() {
 
         <div className="home-projects-grid">
           {projects.slice(0, 3).map((project) => (
-            <ProjectCard
-              key={project.id}
-              project={localizeProject(project, language)}
-              compact
-            />
+            <div key={project.id} className="reveal-on-scroll">
+              <ProjectCard
+                project={localizeProject(project, language)}
+                linkLabel={
+                  language === "en" ? "View on GitHub →" : "前往 GitHub →"
+                }
+                compact
+              />
+            </div>
           ))}
         </div>
 

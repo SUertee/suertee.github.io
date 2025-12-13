@@ -46,6 +46,7 @@
   height: 16rem;
   background: rgba(99, 102, 241, 0.3);
   filter: blur(100px);
+  animation: orb-drift 18s ease-in-out infinite alternate;
 }
 
 .hero-bg-orb--right {
@@ -55,6 +56,7 @@
   height: 20rem;
   background: rgba(45, 212, 191, 0.25);
   filter: blur(120px);
+  animation: orb-drift 22s ease-in-out infinite alternate;
 }
 
 .hero-bg-radial {
@@ -92,6 +94,9 @@
   display: flex;
   flex-direction: column;
   gap: 1.5rem;
+  opacity: 0;
+  transform: translateY(24px) scale(0.98);
+  animation: hero-in 750ms ease forwards;
 }
 
 @media (min-width: 768px) {
@@ -296,6 +301,21 @@
   font-size: 1.1rem;
 }
 
+.hero-scroll-button--inline {
+  position: static;
+  transform: none;
+  width: 2.5rem;
+  height: 2.5rem;
+  margin: 1rem auto 0;
+  animation: hero-arrow-bounce 1.5s infinite ease-in-out;
+}
+
+.section-scroll-wrap {
+  display: flex;
+  justify-content: center;
+  margin-top: 1.25rem;
+}
+
 @keyframes hero-arrow-bounce {
   0%,
   100% {
@@ -414,6 +434,8 @@
   cursor: pointer;
   transition: transform 150ms ease, background-color 150ms ease,
     border-color 150ms ease, box-shadow 150ms ease;
+  overflow: hidden;
+  position: relative;
 }
 
 .section-cta:hover {
@@ -421,6 +443,26 @@
   background: rgba(30, 64, 175, 0.95);
   border-color: rgba(165, 180, 252, 1);
   box-shadow: 0 12px 30px rgba(0, 0, 0, 0.45);
+}
+
+.section-cta::after,
+.home-section-link::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(
+    120deg,
+    transparent,
+    rgba(255, 255, 255, 0.3),
+    transparent
+  );
+  transform: translateX(-120%);
+  transition: transform 400ms ease;
+}
+
+.section-cta:hover::after,
+.home-section-link:hover::after {
+  transform: translateX(120%);
 }
 
 .education-column {
@@ -462,6 +504,8 @@
   flex: 1;
   width: 2px;
   background: linear-gradient(to bottom, rgba(165, 180, 252, 0.35), rgba(34, 211, 238, 0.2));
+  transform-origin: top;
+  transform: scaleY(0);
 }
 
 .education-timeline-card {
@@ -561,6 +605,8 @@
   text-decoration: none;
   transition: background-color 150ms ease, border-color 150ms ease,
     transform 150ms ease, color 150ms ease;
+  overflow: hidden;
+  position: relative;
 }
 
 .home-section-link:hover {
@@ -568,4 +614,35 @@
   background: rgba(30, 64, 175, 0.9);
   color: #f9fafb;
   transform: translateY(-1px);
+}
+
+.reveal-on-scroll {
+  opacity: 0;
+  transform: translateY(28px);
+  transition: opacity 650ms ease, transform 650ms ease;
+}
+
+.reveal-visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+.reveal-visible .education-line {
+  transform: scaleY(1);
+}
+
+@keyframes hero-in {
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes orb-drift {
+  0% {
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  100% {
+    transform: translate3d(12px, -12px, 0) scale(1.05);
+  }
 }

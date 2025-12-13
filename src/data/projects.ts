@@ -10,6 +10,12 @@ export type Project = {
   shortDescription: string;
   highlights: string[];
   link?: string;
+  bookmarkLabel?: string;
+  accent?: string;
+  mediaType?: "image" | "video";
+  mediaLabel?: string;
+  mediaSrc?: string;
+  mediaPoster?: string;
 };
 
 type Localized<T> = Record<LanguageKey, T>;
@@ -38,6 +44,10 @@ export const projects: Project[] = [
       "Designed normalised PostgreSQL schema and used Dockerised Postgres for end-to-end API testing.",
     ],
     link: "https://github.com/SUertee/AI-Game-Based-PM-Learning-Platform",
+    bookmarkLabel: "AI Game",
+    accent: "#a78bfa",
+    mediaType: "video",
+    mediaLabel: "Gameplay & evaluation walkthrough",
   },
   {
     id: "ai-calendar",
@@ -53,6 +63,10 @@ export const projects: Project[] = [
       "Built React calendar UI and Node.js APIs, reducing planning time by ~45%.",
     ],
     link: "", // No link provided
+    bookmarkLabel: "AI Calendar",
+    accent: "#34d399",
+    mediaType: "image",
+    mediaLabel: "Adaptive planner mock",
   },
   {
     id: "vsas",
@@ -67,7 +81,11 @@ export const projects: Project[] = [
       "Achieved 90%+ statement & branch coverage using JUnit + Mockito.",
       "Set up GitHub-based CI/CD and managed sprints and acceptance criteria in Jira.",
     ],
-    link: "", // No link provided
+    link: "https://github.com/SUertee/Virtual-Scroll-Access-System",
+    bookmarkLabel: "VSAS",
+    accent: "#60a5fa",
+    mediaType: "image",
+    mediaLabel: "Access control dashboard",
   },
   {
     id: "chat-room",
@@ -83,6 +101,10 @@ export const projects: Project[] = [
       "Performed PACT analysis, card sorting, low-fidelity prototyping, and usability testing.",
     ],
     link: "", // No link provided
+    bookmarkLabel: "Chat Room",
+    accent: "#f472b6",
+    mediaType: "video",
+    mediaLabel: "Secure messaging flow",
   },
 ];
 
@@ -102,7 +124,10 @@ export const projectsCopy: Localized<{
 };
 
 type ProjectCopy = Partial<
-  Pick<Project, "name" | "role" | "period" | "shortDescription" | "highlights">
+  Pick<
+    Project,
+    "name" | "role" | "period" | "shortDescription" | "highlights" | "bookmarkLabel"
+  >
 >;
 
 const projectOverrides: Record<
@@ -113,6 +138,7 @@ const projectOverrides: Record<
     zh: {
       name: "AI 游戏化项目管理学习平台",
       role: "全栈开发 & AI 测试",
+      bookmarkLabel: "AI 游戏",
       shortDescription:
         "用 AI 人设队友和自动化评估机制，做成游戏方式的项目管理学习平台。",
       highlights: [
@@ -126,6 +152,7 @@ const projectOverrides: Record<
     zh: {
       name: "AI 日历 Web 应用",
       role: "组长 & 全栈开发",
+      bookmarkLabel: "AI 日历",
       shortDescription:
         "自适应调度引擎，依据用户行为动态调整计划，大幅减少排班时间。",
       highlights: [
@@ -139,6 +166,7 @@ const projectOverrides: Record<
     zh: {
       name: "VSAS 虚拟滚动访问控制系统",
       role: "全栈开发 & 系统测试",
+      bookmarkLabel: "VSAS",
       shortDescription:
         "具备 RBAC、REST 集成与高测试覆盖率的安全访问控制平台。",
       highlights: [
@@ -152,6 +180,7 @@ const projectOverrides: Record<
     zh: {
       name: "安全聊天室 Web 应用",
       role: "组长 & 全栈开发",
+      bookmarkLabel: "聊天室",
       shortDescription: "具备实时功能与可访问性的安全消息系统。",
       highlights: [
         "实现 SHA-256+Salt 密码哈希、JWT 认证、AES-GCM 加密以及 HTTPS/TLS。",

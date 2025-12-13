@@ -4,9 +4,10 @@ import { Project } from "@/data/projects";
 type Props = {
   project: Project;
   compact?: boolean;
+  linkLabel?: string;
 };
 
-export default function ProjectCard({ project, compact }: Props) {
+export default function ProjectCard({ project, compact, linkLabel }: Props) {
   return (
     <div className="project-card">
       <div className="project-card-header">
@@ -49,7 +50,7 @@ export default function ProjectCard({ project, compact }: Props) {
           rel="noreferrer"
           className="project-card-link"
         >
-          View on GitHub →
+          {linkLabel ?? "View on GitHub →"}
         </a>
       )}
     </div>

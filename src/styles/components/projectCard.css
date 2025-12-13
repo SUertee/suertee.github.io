@@ -1,6 +1,13 @@
 @layer components {
   .project-card {
-    @apply rounded-xl border border-neutral-800 bg-neutral-950/60 p-4 shadow-sm transition hover:-translate-y-1 hover:border-indigo-400 hover:shadow-lg;
+    @apply rounded-xl border border-neutral-800 bg-neutral-950/60 p-4 shadow-sm;
+    transition: transform 180ms ease, box-shadow 180ms ease, border-color 180ms ease;
+  }
+
+  .project-card:hover {
+    transform: translateY(-6px) scale(1.01);
+    box-shadow: 0 20px 50px rgba(0, 0, 0, 0.45);
+    border-color: rgba(129, 140, 248, 0.5);
   }
 
   .project-card-header {
