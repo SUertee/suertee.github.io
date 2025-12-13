@@ -67,12 +67,16 @@ export default function ProjectsPage() {
   const [selectedId, setSelectedId] = useState<string | null>(null);
   const [isUnpacked, setIsUnpacked] = useState(false);
   const [stageReady, setStageReady] = useState(false);
+  const [hasDealt, setHasDealt] = useState(false);
   const [viewMode, setViewMode] = useState<"scatter" | "timeline">("scatter");
   const [hoveredId, setHoveredId] = useState<string | null>(null);
   const [scatterScale, setScatterScale] = useState(1);
   const [dragOffsets, setDragOffsets] = useState<Record<string, DragOffset>>(
     {}
   );
+  const timelineRef = useRef<HTMLDivElement | null>(null);
+  const timelineScrollRaf = useRef<number | null>(null);
+  const timelineInterruptedRef = useRef(false);
   const dragState = useRef<{
     id: string | null;
     startX: number;
@@ -86,6 +90,8 @@ export default function ProjectsPage() {
     baseX: 0,
     baseY: 0,
   });
+  const isDraggingRef = useRef(false);
+  const skipClickRef = useRef(false);
   const detailRef = useRef<HTMLDivElement | null>(null);
 
   useEffect(() => {
@@ -97,6 +103,11 @@ export default function ProjectsPage() {
   useEffect(() => {
     const timer = setTimeout(() => setStageReady(true), 80);
     return () => clearTimeout(timer);
+  }, []);
+
+  useEffect(() => {
+    const openTimer = setTimeout(() => setIsUnpacked(true), 180);
+    return () => clearTimeout(openTimer);
   }, []);
 
   useEffect(() => {
@@ -120,6 +131,9 @@ export default function ProjectsPage() {
       if (!current.id) return;
       const deltaX = e.clientX - current.startX;
       const deltaY = e.clientY - current.startY;
+      if (Math.abs(deltaX) > 3 || Math.abs(deltaY) > 3) {
+        isDraggingRef.current = true;
+      }
       setDragOffsets((prev) => ({
         ...prev,
         [current.id as string]: {
@@ -130,6 +144,10 @@ export default function ProjectsPage() {
     };
 
     const handleUp = () => {
+      if (isDraggingRef.current) {
+        skipClickRef.current = true;
+      }
+      isDraggingRef.current = false;
       dragState.current.id = null;
     };
 
@@ -176,6 +194,7 @@ export default function ProjectsPage() {
   }, [localizedProjects]);
 
   const timelineMeta = useMemo(() => {
+    const paddingMonths = 1;
     const endMonths = sortedProjects
       .map((p) => monthIndexFromPeriod(p.period, true))
       .filter((v): v is number => v !== null);
@@ -195,17 +214,93 @@ export default function ProjectsPage() {
     }
     const forcedMin = 2024 * 12; // Jan 2024
     const forcedMax = 2025 * 12 + 11; // Dec 2025
-    const minMonth = Math.min(...startMonths, forcedMin);
-    const maxMonth = Math.max(...endMonths, forcedMax);
+    const minMonth = Math.max(
+      0,
+      Math.min(...startMonths, forcedMin) - paddingMonths
+    );
+    const maxMonth = Math.max(...endMonths, forcedMax) + paddingMonths;
     const monthSpan = Math.max(1, maxMonth - minMonth + 1);
     const minYear = Math.floor(minMonth / 12);
     const maxYear = Math.floor(maxMonth / 12);
+    const tickStartYear = Math.max(minYear, Math.floor(forcedMin / 12));
+    const tickEndYear = Math.max(maxYear, Math.floor(forcedMax / 12));
     const ticks = Array.from(
-      { length: maxYear - minYear + 1 },
-      (_, i) => minYear + i
+      { length: tickEndYear - tickStartYear + 1 },
+      (_, i) => tickStartYear + i
     );
     return { minMonth, maxMonth, monthSpan, minYear, maxYear, ticks };
   }, [sortedProjects]);
+
+  const timelineWidth = useMemo(
+    () => Math.max(900, timelineMeta.monthSpan * 90),
+    [timelineMeta.monthSpan]
+  );
+
+  useEffect(() => {
+    if (viewMode !== "timeline") return;
+    if (!timelineRef.current || !sortedProjects.length) return;
+    if (timelineScrollRaf.current) {
+      cancelAnimationFrame(timelineScrollRaf.current);
+      timelineScrollRaf.current = null;
+    }
+    timelineInterruptedRef.current = false;
+
+    const firstProject = sortedProjects[0];
+    const endIdx = monthIndexFromPeriod(firstProject.period, true);
+    if (endIdx === null) return;
+    const cardLeft =
+      ((endIdx - timelineMeta.minMonth) / timelineMeta.monthSpan) *
+      timelineWidth;
+
+    const start = 0;
+    const target = Math.max(0, cardLeft - 24);
+    if (!Number.isFinite(start) || !Number.isFinite(target)) return;
+
+    const container = timelineRef.current;
+    container.scrollTo({ left: start, behavior: "auto" });
+    const duration = 16800;
+    const startTime = performance.now();
+    const animate = (now: number) => {
+      if (timelineInterruptedRef.current) return;
+      const elapsed = now - startTime;
+      const progress = Math.min(1, elapsed / duration);
+      const eased = 1 - Math.pow(1 - progress, 3);
+      const next = start + (target - start) * eased;
+      container.scrollLeft = next;
+      if (progress < 1) {
+        timelineScrollRaf.current = requestAnimationFrame(animate);
+      }
+    };
+    timelineScrollRaf.current = requestAnimationFrame(animate);
+    return () => {
+      if (timelineScrollRaf.current) {
+        cancelAnimationFrame(timelineScrollRaf.current);
+        timelineScrollRaf.current = null;
+      }
+    };
+  }, [sortedProjects, timelineMeta, timelineWidth, viewMode]);
+
+  useEffect(() => {
+    if (viewMode !== "timeline") return;
+    const el = timelineRef.current;
+    if (!el) return;
+    const stopAnimation = () => {
+      timelineInterruptedRef.current = true;
+      if (timelineScrollRaf.current) {
+        cancelAnimationFrame(timelineScrollRaf.current);
+        timelineScrollRaf.current = null;
+      }
+    };
+    el.addEventListener("wheel", stopAnimation, { passive: true });
+    el.addEventListener("pointerdown", stopAnimation);
+    el.addEventListener("touchstart", stopAnimation, { passive: true });
+
+    return () => {
+      el.removeEventListener("wheel", stopAnimation);
+      el.removeEventListener("pointerdown", stopAnimation);
+      el.removeEventListener("touchstart", stopAnimation);
+    };
+  }, [viewMode]);
 
   const handlePick = (project: Project) => {
     setSelectedId(project.id);
@@ -221,8 +316,11 @@ export default function ProjectsPage() {
   };
 
   return (
-    <div className="projects-page">
-      <header className="projects-header">
+    <div className={`projects-page ${stageReady ? "is-mounted" : ""}`}>
+      <header
+        className="projects-header reveal-block"
+        style={{ ["--reveal-delay" as string]: "0ms" }}
+      >
         <div className="projects-lede">
           <p className="projects-kicker">Projects</p>
           <h1 className="projects-title">{copy.title}</h1>
@@ -230,7 +328,12 @@ export default function ProjectsPage() {
         </div>
       </header>
 
-      <section className="projects-folder">
+      <section
+        className={`projects-folder reveal-block ${
+          viewMode === "timeline" ? "is-timeline-entry" : ""
+        }`}
+        style={{ ["--reveal-delay" as string]: "140ms" }}
+      >
         <div className="view-toggle">
           <button
             type="button"
@@ -284,6 +387,8 @@ export default function ProjectsPage() {
               const scatter = scatterLayouts[idx % scatterLayouts.length];
               const stackOffset = stackOffsets[idx % stackOffsets.length];
               const dragOffset = dragOffsets[project.id] ?? { x: 0, y: 0 };
+              const staggerDelay = `${idx * 70}ms`;
+              const dealOffset = idx % 2 === 0 ? -16 : 16;
               const transform = isUnpacked
                 ? `translate(calc(-50% + ${
                     scatter.x * scatterScale + dragOffset.x
@@ -292,9 +397,7 @@ export default function ProjectsPage() {
                   }px)) rotate(${scatter.rotate}deg) scale(${scatterScale})`
                 : `translate(calc(-50% + ${
                     stackOffset * scatterScale
-                  }px), calc(-50% - ${
-                    idx * 3 * scatterScale
-                  }px)) rotate(${
+                  }px), calc(-50% - ${idx * 3 * scatterScale}px)) rotate(${
                     stackOffset * 0.6
                   }deg) scale(${0.9 * scatterScale})`;
 
@@ -302,7 +405,13 @@ export default function ProjectsPage() {
                 <button
                   key={project.id}
                   type="button"
-                  onClick={() => handlePick(project)}
+                  onClick={() => {
+                    if (skipClickRef.current || isDraggingRef.current) {
+                      skipClickRef.current = false;
+                      return;
+                    }
+                    handlePick(project);
+                  }}
                   onMouseDown={(e) => {
                     dragState.current = {
                       id: project.id,
@@ -311,11 +420,14 @@ export default function ProjectsPage() {
                       baseX: dragOffsets[project.id]?.x ?? 0,
                       baseY: dragOffsets[project.id]?.y ?? 0,
                     };
+                    isDraggingRef.current = false;
                     setIsUnpacked(true);
                   }}
                   style={
                     {
                       ["--card-transform" as string]: transform,
+                      ["--stagger-delay" as string]: staggerDelay,
+                      ["--deal-offset" as string]: `${dealOffset}px`,
                       zIndex: 50 + (localizedProjects.length - idx),
                       ["--project-accent" as string]:
                         project.accent ?? fallbackAccent,
@@ -345,10 +457,10 @@ export default function ProjectsPage() {
             })}
           </div>
         ) : (
-          <div className="timeline-graph">
+          <div className="timeline-graph is-entering" ref={timelineRef}>
             {(() => {
               const monthSpan = timelineMeta.monthSpan;
-              const widthPx = Math.max(900, monthSpan * 90);
+              const widthPx = timelineWidth;
               const axisY = 60;
               const lineY = axisY + 10;
               const cardsY = axisY + 80;
@@ -496,8 +608,13 @@ export default function ProjectsPage() {
 
       {selectedProject && (
         <section
-          className="project-showcase is-visible"
-          style={{ ["--project-accent" as string]: accent }}
+          className="project-showcase is-visible reveal-block"
+          style={
+            {
+              ["--project-accent" as string]: accent,
+              ["--reveal-delay" as string]: "280ms",
+            } as CSSProperties
+          }
           ref={detailRef}
         >
           <div className="project-copy is-visible">

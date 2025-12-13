@@ -3,6 +3,24 @@
     @apply space-y-8 pb-14 md:space-y-10;
   }
 
+  .reveal-block {
+    opacity: 0;
+    transform: translateY(18px);
+    filter: blur(8px);
+    transition:
+      opacity 520ms ease,
+      transform 560ms cubic-bezier(0.2, 0.8, 0.2, 1),
+      filter 520ms ease;
+    transition-delay: var(--reveal-delay, 0ms);
+    will-change: opacity, transform, filter;
+  }
+
+  .projects-page.is-mounted .reveal-block {
+    opacity: 1;
+    transform: translateY(0);
+    filter: blur(0);
+  }
+
   .projects-header {
     @apply flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between;
   }
@@ -40,9 +58,13 @@
         rgba(52, 211, 153, 0.1),
         transparent 40%
       ),
-      linear-gradient(135deg, rgba(8, 47, 73, 0.85), rgba(12, 10, 24, 0.92));
+    linear-gradient(135deg, rgba(8, 47, 73, 0.85), rgba(12, 10, 24, 0.92));
     box-shadow: 0 20px 60px rgba(0, 0, 0, 0.45);
     padding: 1.5rem;
+  }
+
+  .projects-folder.is-timeline-entry {
+    animation: folder-sweep-in 880ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
   }
 
   .projects-folder::after {
@@ -210,6 +232,14 @@
       border-color 220ms ease,
       filter 220ms ease;
     cursor: grab;
+    animation: none;
+  }
+
+  .scatter-card.is-dealing {
+    opacity: 0;
+    transform: translate(-50%, 32%) scale(0.68) rotate(-6deg);
+    animation: scatter-deal 640ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
+    animation-delay: var(--stagger-delay, 0ms);
   }
 
   .scatter-card.is-active {
@@ -289,6 +319,20 @@
     position: relative;
     overflow-x: auto;
     padding: 1rem 0.25rem 1.5rem;
+    clip-path: inset(0 0 0 0);
+  }
+
+  .timeline-graph.is-entering .timeline-rail {
+    opacity: 0;
+    transform: translateX(-18px);
+    animation: timeline-section-reveal 900ms cubic-bezier(0.2, 0.8, 0.2, 1)
+      forwards;
+    animation-delay: 80ms;
+  }
+
+  .timeline-graph.is-entering .timeline-axis::after {
+    animation: timeline-sweep 5800ms ease forwards;
+    animation-delay: 20ms;
   }
 
   .timeline-rail {
@@ -308,6 +352,26 @@
       rgba(99, 102, 241, 0.25)
     );
     border-radius: 9999px;
+    overflow: visible;
+    isolation: isolate;
+  }
+
+  .timeline-axis::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    background: linear-gradient(
+      90deg,
+      rgba(16, 185, 129, 0.85),
+      rgba(94, 234, 212, 0.8),
+      rgba(129, 140, 248, 0.9)
+    );
+    transform-origin: left;
+    transform: scaleX(0);
+    opacity: 0.85;
+    box-shadow:
+      0 0 26px rgba(129, 140, 248, 0.35),
+      0 0 18px rgba(16, 185, 129, 0.22);
   }
 
   .timeline-tick {
@@ -455,6 +519,54 @@
     white-space: nowrap;
     box-shadow: 0 6px 16px rgba(0, 0, 0, 0.35);
     pointer-events: none;
+  }
+
+  @keyframes folder-sweep-in {
+    from {
+      opacity: 0;
+      transform: translateX(-18px);
+      clip-path: inset(0 24% 0 0);
+      filter: blur(6px);
+    }
+    60% {
+      opacity: 1;
+    }
+    to {
+      opacity: 1;
+      transform: translateX(0);
+      clip-path: inset(0 0 0 0);
+      filter: blur(0);
+    }
+  }
+
+  @keyframes timeline-section-reveal {
+    0% {
+      opacity: 0;
+      transform: translateX(-18px);
+      clip-path: inset(0 18% 0 0);
+    }
+    60% {
+      opacity: 1;
+    }
+    100% {
+      opacity: 1;
+      transform: translateX(0);
+      clip-path: inset(0 0 0 0);
+    }
+  }
+
+  @keyframes timeline-sweep {
+    from {
+      transform: scaleX(0);
+      opacity: 0.4;
+    }
+    60% {
+      opacity: 0.9;
+    }
+    to {
+      transform: scaleX(1);
+      opacity: 1;
+    }
   }
 
   /* Showcase layout */
@@ -778,6 +890,26 @@
     100% {
       opacity: 1;
       transform: scale(1);
+    }
+  }
+
+  @keyframes scatter-deal {
+    0% {
+      opacity: 0;
+      transform: translate(calc(-50% + var(--deal-offset, 0px)), 40%)
+        scale(0.64) rotate(-10deg);
+      filter: blur(6px);
+    }
+    60% {
+      opacity: 1;
+      transform: translate(calc(-50% + var(--deal-offset, 0px)), -8%)
+        scale(0.98) rotate(1deg);
+      filter: blur(1px);
+    }
+    100% {
+      opacity: 1;
+      transform: var(--card-transform);
+      filter: blur(0);
     }
   }
 }
