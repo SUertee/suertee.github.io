@@ -8,6 +8,7 @@ import {
   useState,
 } from "react";
 import type { Project } from "@/data/projects";
+import { useProjectScale } from "./useProjectScale";
 
 type ScatterLayout = { x: number; y: number; rotate: number };
 type DragOffset = { x: number; y: number };
@@ -37,7 +38,8 @@ export function ScatterView({
   fallbackAccent,
 }: ScatterViewProps) {
   const [isUnpacked, setIsUnpacked] = useState(false);
-  const [scatterScale, setScatterScale] = useState(1);
+  // Shared responsive scale used by both scatter and timeline views.
+  const scatterScale = useProjectScale();
   const [dragOffsets, setDragOffsets] = useState<Record<string, DragOffset>>(
     {}
   );
@@ -60,21 +62,6 @@ export function ScatterView({
   useEffect(() => {
     const openTimer = setTimeout(() => setIsUnpacked(true), 180);
     return () => clearTimeout(openTimer);
-  }, []);
-
-  useEffect(() => {
-    const computeScale = () => {
-      const w = window.innerWidth;
-      if (w < 480) return 0.6;
-      if (w < 640) return 0.7;
-      if (w < 820) return 0.8;
-      if (w < 1024) return 0.9;
-      return 1;
-    };
-    const handler = () => setScatterScale(computeScale());
-    handler();
-    window.addEventListener("resize", handler);
-    return () => window.removeEventListener("resize", handler);
   }, []);
 
   useEffect(() => {

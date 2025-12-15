@@ -8,6 +8,7 @@ import {
   useState,
 } from "react";
 import type { Project } from "@/data/projects";
+import { useProjectScale } from "./useProjectScale";
 
 const monthNames = [
   "Jan",
@@ -53,10 +54,15 @@ export function TimelineView({
   fallbackAccent,
 }: TimelineViewProps) {
   const [hoveredId, setHoveredId] = useState<string | null>(null);
+  const [visibleIds, setVisibleIds] = useState<Set<string>>(new Set());
+  const [viewportWidth, setViewportWidth] = useState(0);
+  // Shared responsive scale so timeline cards match scatter breakpoints.
+  const timelineScale = useProjectScale();
   const timelineRef = useRef<HTMLDivElement | null>(null);
   const timelineScrollRaf = useRef<number | null>(null);
   const timelineInterruptedRef = useRef(false);
   const timelineScrollDuration = 16800;
+  const revealBuffer = 140;
 
   const monthIndexFromPeriod = (period?: string, takeEnd = false) => {
     if (!period) return null;
@@ -123,9 +129,48 @@ export function TimelineView({
   }, [sortedProjects]);
 
   const timelineWidth = useMemo(
-    () => Math.max(900, timelineMeta.monthSpan * 90),
-    [timelineMeta.monthSpan]
+    () =>
+      Math.max(
+        900,
+        timelineMeta.monthSpan * 90 * timelineScale,
+        viewportWidth ? viewportWidth + 600 : 0
+      ),
+    [timelineMeta.monthSpan, timelineScale, viewportWidth]
   );
+
+  const timelinePositions = useMemo(() => {
+    return sortedProjects.map((project) => {
+      const endIdx = monthIndexFromPeriod(project.period, true);
+      const pos =
+        endIdx === null
+          ? 0
+          : ((endIdx - timelineMeta.minMonth) / timelineMeta.monthSpan) *
+            timelineWidth;
+      return { id: project.id, pos };
+    });
+  }, [
+    sortedProjects,
+    timelineMeta.minMonth,
+    timelineMeta.monthSpan,
+    timelineWidth,
+  ]);
+
+  const updateVisibility = (scrollLeft: number, width: number) => {
+    const start = scrollLeft - revealBuffer;
+    const end = scrollLeft + width + revealBuffer;
+    const next = new Set<string>();
+    timelinePositions.forEach(({ id, pos }) => {
+      if (pos >= start && pos <= end) {
+        next.add(id);
+      }
+    });
+    setVisibleIds((prev) => {
+      if (prev.size === next.size && [...prev].every((id) => next.has(id))) {
+        return prev;
+      }
+      return next;
+    });
+  };
 
   useEffect(() => {
     if (!timelineRef.current || !sortedProjects.length) return;
@@ -145,6 +190,7 @@ export function TimelineView({
     if (!Number.isFinite(start) || !Number.isFinite(target)) return;
     const container = timelineRef.current;
     container.scrollTo({ left: start, behavior: "auto" });
+    updateVisibility(container.scrollLeft, container.clientWidth);
     const startTime = performance.now();
     const animate = (now: number) => {
       if (timelineInterruptedRef.current) return;
@@ -153,6 +199,7 @@ export function TimelineView({
       const eased = 1 - Math.pow(1 - progress, 3);
       const next = start + (target - start) * eased;
       container.scrollLeft = next;
+      updateVisibility(next, container.clientWidth);
       if (progress < 1) {
         timelineScrollRaf.current = requestAnimationFrame(animate);
       }
@@ -179,10 +226,35 @@ export function TimelineView({
     el.addEventListener("wheel", stopAnimation, { passive: true });
     el.addEventListener("pointerdown", stopAnimation);
     el.addEventListener("touchstart", stopAnimation, { passive: true });
+    const handleScroll = () => updateVisibility(el.scrollLeft, el.clientWidth);
+    const handleResize = () => updateVisibility(el.scrollLeft, el.clientWidth);
+    el.addEventListener("scroll", handleScroll, { passive: true });
+    window.addEventListener("resize", handleResize);
+    updateVisibility(el.scrollLeft, el.clientWidth);
     return () => {
       el.removeEventListener("wheel", stopAnimation);
       el.removeEventListener("pointerdown", stopAnimation);
       el.removeEventListener("touchstart", stopAnimation);
+      el.removeEventListener("scroll", handleScroll);
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [timelinePositions]);
+
+  useEffect(() => {
+    const updateWidth = () => {
+      if (timelineRef.current) {
+        setViewportWidth(timelineRef.current.clientWidth);
+      }
+    };
+    updateWidth();
+    const observer = new ResizeObserver(updateWidth);
+    if (timelineRef.current) {
+      observer.observe(timelineRef.current);
+    }
+    window.addEventListener("resize", updateWidth);
+    return () => {
+      observer.disconnect();
+      window.removeEventListener("resize", updateWidth);
     };
   }, []);
 
@@ -193,6 +265,7 @@ export function TimelineView({
       style={
         {
           ["--timeline-sweep-duration" as string]: `${timelineScrollDuration}ms`,
+          ["--timeline-scale" as string]: timelineScale,
         } as CSSProperties
       }
     >
@@ -208,6 +281,7 @@ export function TimelineView({
             style={{
               width: `${widthPx}px`,
               height: `${cardsY + 220}px`,
+              ["--timeline-scale" as string]: timelineScale,
             }}
           >
             <div className="timeline-axis" style={{ top: `${axisY}px` }}>
@@ -293,7 +367,7 @@ export function TimelineView({
                     onClick={() => onSelect(project)}
                     className={`timeline-card ${
                       selectedId === project.id ? "is-active" : ""
-                    }`}
+                    } ${visibleIds.has(project.id) ? "is-visible" : ""}`}
                     onMouseEnter={() => setHoveredId(project.id)}
                     onMouseLeave={() => setHoveredId(null)}
                     style={
@@ -302,6 +376,7 @@ export function TimelineView({
                         top: `${cardsY}px`,
                         ["--project-accent" as string]:
                           project.accent ?? fallbackAccent,
+                        ["--timeline-scale" as string]: timelineScale,
                       } as CSSProperties
                     }
                   >

@@ -64,7 +64,7 @@
   }
 
   .projects-folder.is-timeline-entry {
-    animation: folder-sweep-in 880ms cubic-bezier(0.2, 0.8, 0.2, 1) forwards;
+    animation: folder-sweep-in 4800ms cubic-bezier(0.22, 1, 0.36, 1) forwards;
   }
 
   .projects-folder::after {
@@ -207,12 +207,15 @@
   @keyframes folder-sweep-in {
     from {
       opacity: 0;
-      transform: translateX(-18px);
-      clip-path: inset(0 24% 0 0);
-      filter: blur(6px);
+      transform: translateX(-36px);
+      clip-path: inset(0 100% 0 0);
+      filter: blur(3px);
     }
     60% {
       opacity: 1;
+      transform: translateX(8px);
+      clip-path: inset(0 0 0 0);
+      filter: blur(0.5px);
     }
     to {
       opacity: 1;
