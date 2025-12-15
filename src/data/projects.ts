@@ -100,7 +100,7 @@ export const projects: Project[] = [
       "Added friend requests, multi-user chatrooms, persistent history, and role-based access control.",
       "Performed PACT analysis, card sorting, low-fidelity prototyping, and usability testing.",
     ],
-    link: "", // No link provided
+    link: "https://github.com/SUertee/Chat_Room_Web_App",
     bookmarkLabel: "Chat Room",
     accent: "#f472b6",
     mediaType: "video",

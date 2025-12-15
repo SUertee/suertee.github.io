@@ -35,7 +35,7 @@ export default function HomePage() {
 
   useEffect(() => {
     const elements = Array.from(
-      document.querySelectorAll<HTMLElement>(".reveal-on-scroll"),
+      document.querySelectorAll<HTMLElement>(".reveal-on-scroll")
     );
 
     if (!("IntersectionObserver" in window)) {
@@ -52,7 +52,7 @@ export default function HomePage() {
           }
         });
       },
-      { threshold: 0.2 },
+      { threshold: 0.2 }
     );
 
     elements.forEach((el) => observer.observe(el));
@@ -76,7 +76,7 @@ export default function HomePage() {
           <div className="hero-avatar-floating">
             <img
               src="/avatar/me.jpg"
-              alt="Jiacheng Xu"
+              alt="Harry Xu"
               className="hero-avatar-floating-img"
             />
           </div>
