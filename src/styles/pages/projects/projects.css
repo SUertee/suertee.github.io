@@ -1,4 +1,7 @@
 @layer components {
+  /* Projects page layout and reveal transitions (page-level framing).
+     Reason: keeps top-level spacing consistent and uses a reveal class to
+     stagger content on mount. */
   .projects-page {
     @apply space-y-8 pb-14 md:space-y-10;
   }
@@ -41,7 +44,8 @@
     @apply max-w-2xl text-sm text-neutral-300;
   }
 
-  /* Folder wrapper */
+  /* Folder wrapper: provides the glassy container and sweep-in animation.
+     Reason: visually groups the project views and adds an immersive entry. */
 
   .projects-folder {
     position: relative;
@@ -79,6 +83,8 @@
     pointer-events: none;
   }
 
+  /* View toggle buttons (switch between scatter / timeline).
+     Reason: simple pill controls to swap layouts without page reload. */
   .view-toggle {
     @apply mb-3 flex flex-wrap gap-2;
   }
@@ -225,7 +231,8 @@
     }
   }
 
-  /* Showcase layout */
+  /* Showcase layout: detail panel and media alongside the cards.
+     Reason: displays the selected project’s copy/media next to the cards. */
 
   .project-showcase {
     display: grid;

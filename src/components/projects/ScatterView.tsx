@@ -13,6 +13,7 @@ import { useProjectScale } from "./useProjectScale";
 type ScatterLayout = { x: number; y: number; rotate: number };
 type DragOffset = { x: number; y: number };
 
+// Predefined scatter positions/rotations to fan cards out when opened.
 const scatterLayouts: ScatterLayout[] = [
   { x: -180, y: -120, rotate: -8 },
   { x: -50, y: -20, rotate: -3 },
@@ -20,6 +21,7 @@ const scatterLayouts: ScatterLayout[] = [
   { x: -150, y: 90, rotate: 5 },
 ];
 
+// Offsets for the stacked (closed) state.
 const stackOffsets = [-4, -2, 2, 6, -6];
 
 type ScatterViewProps = {
@@ -43,6 +45,7 @@ export function ScatterView({
   const [dragOffsets, setDragOffsets] = useState<Record<string, DragOffset>>(
     {}
   );
+  // Tracks current drag gesture for a card.
   const dragState = useRef<{
     id: string | null;
     startX: number;
@@ -60,11 +63,13 @@ export function ScatterView({
   const skipClickRef = useRef(false);
 
   useEffect(() => {
+    // Auto-open after mount for a small reveal.
     const openTimer = setTimeout(() => setIsUnpacked(true), 180);
     return () => clearTimeout(openTimer);
   }, []);
 
   useEffect(() => {
+    // Global mouse handlers for dragging cards across the stage.
     const handleMove = (e: MouseEvent) => {
       const current = dragState.current;
       if (!current.id) return;
@@ -82,6 +87,7 @@ export function ScatterView({
       }));
     };
 
+    // Release drag and optionally cancel click when movement occurred.
     const handleUp = () => {
       if (isDraggingRef.current) {
         skipClickRef.current = true;
@@ -130,6 +136,7 @@ export function ScatterView({
         const dragOffset = dragOffsets[project.id] ?? { x: 0, y: 0 };
         const staggerDelay = `${idx * 70}ms`;
         const dealOffset = idx % 2 === 0 ? -16 : 16;
+        // Position depends on whether cards are fanned out or stacked.
         const transform = isUnpacked
           ? `translate(calc(-50% + ${
               scatter.x * scatterScale + dragOffset.x

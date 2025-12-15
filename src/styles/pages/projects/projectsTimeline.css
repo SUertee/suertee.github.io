@@ -1,5 +1,6 @@
 @layer components {
-  /* Timeline layout */
+  /* Timeline layout: rail, axis, and entrance sweep.
+     Reason: frames the horizontal flow and animates the timeline into view. */
 
   .timeline-graph {
     position: relative;
@@ -87,6 +88,8 @@
     pointer-events: none;
   }
 
+  /* Segments and cards: interactive timeline markers and cards.
+     Reason: show project durations on hover/active and render the cards. */
   .timeline-segment {
     position: absolute;
     height: 8px;

@@ -1,4 +1,6 @@
 @layer components {
+  /* Scatter stage and folder: sets the play space and initial folder motif.
+     Reason: keeps the scatter view contained and hints at card origin. */
   .scatter-stage {
     position: relative;
     height: 420px;
@@ -71,6 +73,7 @@
     box-shadow: 0 0 18px rgba(99, 102, 241, 0.7);
   }
 
+  /* Scatter card styling (shared visual language with timeline) */
   .scatter-card {
     position: absolute;
     left: 50%;

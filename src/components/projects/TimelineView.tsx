@@ -65,6 +65,7 @@ export function TimelineView({
   const revealBuffer = 140;
 
   const monthIndexFromPeriod = (period?: string, takeEnd = false) => {
+    // Convert a period string like "Aug 2025 – Oct 2025" to a month index.
     if (!period) return null;
     const parts = period.split("–").map((p) => p.trim());
     const target = takeEnd && parts[1] ? parts[1] : parts[0];
@@ -76,12 +77,14 @@ export function TimelineView({
   };
 
   const formatMonthYear = (monthIndex: number | null) => {
+    // Month index back to "Jan" label.
     if (monthIndex === null) return "";
     const year = Math.floor(monthIndex / 12);
     const month = monthIndex % 12;
     return monthNames[month];
   };
 
+  // Projects sorted by end date (latest first) for consistent ordering.
   const sortedProjects = useMemo(() => {
     return [...projects].sort((a, b) => {
       const endA = monthIndexFromPeriod(a.period, true) ?? 0;
@@ -90,6 +93,7 @@ export function TimelineView({
     });
   }, [projects]);
 
+  // Compute timeline span and year ticks (anchored to include 2024–2025).
   const timelineMeta = useMemo(() => {
     const paddingMonths = 1;
     const endMonths = sortedProjects
@@ -139,6 +143,7 @@ export function TimelineView({
   );
 
   const timelinePositions = useMemo(() => {
+    // Use end date for card anchor; visibility uses this anchor plus a buffer.
     return sortedProjects.map((project) => {
       const endIdx = monthIndexFromPeriod(project.period, true);
       const pos =
@@ -155,7 +160,9 @@ export function TimelineView({
     timelineWidth,
   ]);
 
+  // Mark cards visible if their anchor sits inside the viewport + buffer.
   const updateVisibility = (scrollLeft: number, width: number) => {
+    // Flag cards as visible when their anchor overlaps the viewport.
     const start = scrollLeft - revealBuffer;
     const end = scrollLeft + width + revealBuffer;
     const next = new Set<string>();
@@ -173,38 +180,54 @@ export function TimelineView({
   };
 
   useEffect(() => {
+    // Set initial scroll to the first (latest) project, then auto-scroll to its card.
     if (!timelineRef.current || !sortedProjects.length) return;
+
+    // Reset any prior animation state.
     if (timelineScrollRaf.current) {
       cancelAnimationFrame(timelineScrollRaf.current);
       timelineScrollRaf.current = null;
     }
     timelineInterruptedRef.current = false;
+
+    // Locate first project anchor.
     const firstProject = sortedProjects[0];
     const endIdx = monthIndexFromPeriod(firstProject.period, true);
     if (endIdx === null) return;
     const cardLeft =
       ((endIdx - timelineMeta.minMonth) / timelineMeta.monthSpan) *
       timelineWidth;
+
+    // Compute scroll window.
     const start = 0;
-    const target = Math.max(0, cardLeft - 24);
+    const target = Math.max(0, cardLeft - 24); // leave a small leading margin
     if (!Number.isFinite(start) || !Number.isFinite(target)) return;
+
     const container = timelineRef.current;
+
+    // Jump to start, then ease to target.
     container.scrollTo({ left: start, behavior: "auto" });
     updateVisibility(container.scrollLeft, container.clientWidth);
+
     const startTime = performance.now();
     const animate = (now: number) => {
       if (timelineInterruptedRef.current) return;
+
       const elapsed = now - startTime;
       const progress = Math.min(1, elapsed / timelineScrollDuration);
       const eased = 1 - Math.pow(1 - progress, 3);
       const next = start + (target - start) * eased;
+
       container.scrollLeft = next;
       updateVisibility(next, container.clientWidth);
+
       if (progress < 1) {
         timelineScrollRaf.current = requestAnimationFrame(animate);
       }
     };
+
     timelineScrollRaf.current = requestAnimationFrame(animate);
+
     return () => {
       if (timelineScrollRaf.current) {
         cancelAnimationFrame(timelineScrollRaf.current);
@@ -216,6 +239,8 @@ export function TimelineView({
   useEffect(() => {
     const el = timelineRef.current;
     if (!el) return;
+
+    // User interaction stops auto-scroll.
     const stopAnimation = () => {
       timelineInterruptedRef.current = true;
       if (timelineScrollRaf.current) {
@@ -223,14 +248,18 @@ export function TimelineView({
         timelineScrollRaf.current = null;
       }
     };
+
+    const handleScroll = () => updateVisibility(el.scrollLeft, el.clientWidth);
+    const handleResize = () => updateVisibility(el.scrollLeft, el.clientWidth);
+
     el.addEventListener("wheel", stopAnimation, { passive: true });
     el.addEventListener("pointerdown", stopAnimation);
     el.addEventListener("touchstart", stopAnimation, { passive: true });
-    const handleScroll = () => updateVisibility(el.scrollLeft, el.clientWidth);
-    const handleResize = () => updateVisibility(el.scrollLeft, el.clientWidth);
     el.addEventListener("scroll", handleScroll, { passive: true });
     window.addEventListener("resize", handleResize);
+
     updateVisibility(el.scrollLeft, el.clientWidth);
+
     return () => {
       el.removeEventListener("wheel", stopAnimation);
       el.removeEventListener("pointerdown", stopAnimation);
@@ -241,6 +270,7 @@ export function TimelineView({
   }, [timelinePositions]);
 
   useEffect(() => {
+    // Track container width to extend rail to full viewport + buffer.
     const updateWidth = () => {
       if (timelineRef.current) {
         setViewportWidth(timelineRef.current.clientWidth);
