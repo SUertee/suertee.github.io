@@ -409,6 +409,7 @@ export function TimelineView({
                         ["--timeline-scale" as string]: timelineScale,
                       } as CSSProperties
                     }
+                    data-water-target
                   >
                     <div className="timeline-meta">
                       <span className="timeline-dot" />

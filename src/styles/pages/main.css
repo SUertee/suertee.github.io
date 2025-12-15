@@ -1,5 +1,7 @@
 @layer components {
   .main-layout {
     @apply w-full px-6 pt-20 md:px-10 lg:px-14;
+    position: relative;
+    z-index: 2; /* sits above fluid/spline backgrounds */
   }
 }

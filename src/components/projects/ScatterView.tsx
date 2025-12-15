@@ -177,13 +177,14 @@ export function ScatterView({
                 ["--stagger-delay" as string]: staggerDelay,
                 ["--deal-offset" as string]: `${dealOffset}px`,
                 zIndex: 50 + (projects.length - idx),
-                ["--project-accent" as string]:
-                  project.accent ?? fallbackAccent,
-              } as CSSProperties
-            }
+              ["--project-accent" as string]:
+                project.accent ?? fallbackAccent,
+            } as CSSProperties
+          }
             className={`scatter-card ${isUnpacked ? "is-open" : ""} ${
               selectedId === project.id ? "is-active" : ""
             }`}
+            data-water-target
           >
             <div className="scatter-card-top">
               <span className="scatter-dot" />
